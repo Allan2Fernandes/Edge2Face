@@ -114,24 +114,26 @@ class GAN:
                     total_gen_loss = self.get_gen_loss(gen_target_outputs=gen_target_outputs,fake_gen_outputs=fake_gen_outputs,fake_disc_outputs=fake_disc_outputs)
                     pass
 
-                    # Differentiate the total disc loss with respect to the disc weights
-                    disc_gradient = discriminator_tape.gradient(total_disc_loss, self.discriminator.trainable_variables)
-                    # Gradient descent using the gradient
-                    self.disc_optimizer.apply_gradients(zip(disc_gradient, self.discriminator.trainable_variables))
+                # Differentiate the total disc loss with respect to the disc weights
+                disc_gradient = discriminator_tape.gradient(total_disc_loss, self.discriminator.trainable_variables)
+                # Gradient descent using the gradient
+                self.disc_optimizer.apply_gradients(zip(disc_gradient, self.discriminator.trainable_variables))
 
-                    # Differentiate the gradient with respect to the generator trainable weights
-                    gen_gradient = generator_tape.gradient(total_gen_loss, self.generator.trainable_variables)
-                    # Gradient descent using the gradient
-                    self.gen_optimizer.apply_gradients(zip(gen_gradient, self.generator.trainable_variables))
-                    end_time = time.time()
-                    time_per_step = end_time - start_time
-                    est_epoch_time = time_per_step * num_batches
-                    print("Step:{4}/{5} Total gen loss = {0:.4f} || Total disc loss = {1:.4f} || Time Per step = {2:.4f}s || Est. Time per epoch = {3:.4f}s"
-                          .format(total_gen_loss, tf.math.reduce_mean(total_disc_loss), time_per_step, est_epoch_time, step, num_batches))
-                    if step % 50 == 0:
-                        self.generate_images(self.generator, real_gen_inputs, gen_target_outputs)
+                # Differentiate the gradient with respect to the generator trainable weights
+                gen_gradient = generator_tape.gradient(total_gen_loss, self.generator.trainable_variables)
+                # Gradient descent using the gradient
+                self.gen_optimizer.apply_gradients(zip(gen_gradient, self.generator.trainable_variables))
+                end_time = time.time()
+                time_per_step = end_time - start_time
+                est_epoch_time = time_per_step * num_batches
+                print("Step:{4}/{5} Total gen loss = {0:.4f} || Total disc loss = {1:.4f} || Time Per step = {2:.4f}s || Est. Time per epoch = {3:.4f}s".format(total_gen_loss, tf.math.reduce_mean(total_disc_loss), time_per_step, est_epoch_time, step, num_batches))
+                if step % 50 == 0:
+                    self.generate_images(self.generator, real_gen_inputs, gen_target_outputs)
                     pass
                 pass
+            #Save model after every epoch
+            tf.keras.model.save_model(self.generator, f"Models/Epoch{epoch}/Generator")
+            tf.keras.model.save_model(self.discriminator, f"Models/Epoch{epoch}/Discriminator")
             pass
         pass
 
