@@ -5,6 +5,7 @@ import time
 import numpy as np
 import cv2
 
+
 class GAN:
     def __init__(self, reconstruction_loss_weight, generator, discriminator):
         self.reconstruction_loss_weight = reconstruction_loss_weight
@@ -16,6 +17,7 @@ class GAN:
         index = random.randrange(test_input.shape[0])
 
         prediction = model(test_input, training=True)
+        prediction = np.array(prediction, dtype='float64')
         plt.figure(figsize=(15, 15))
 
         display_list = [test_input[index], tar[index], prediction[index]]
@@ -91,8 +93,8 @@ class GAN:
         real_gen_inputs = self.preprocess_tensor(real_gen_inputs)
         return real_gen_inputs
 
-    def train_model(self, epochs, dataset):
-        for epoch in range(epochs):
+    def train_model(self, epochs, dataset, starting_epoch=0):
+        for epoch in range(1, epochs):
             for step, gen_target_outputs in enumerate(dataset):
                 num_batches = len(dataset)
                 start_time = time.time()
@@ -126,14 +128,15 @@ class GAN:
                 end_time = time.time()
                 time_per_step = end_time - start_time
                 est_epoch_time = time_per_step * num_batches
-                print("Step:{4}/{5} Total gen loss = {0:.4f} || Total disc loss = {1:.4f} || Time Per step = {2:.4f}s || Est. Time per epoch = {3:.4f}s".format(total_gen_loss, tf.math.reduce_mean(total_disc_loss), time_per_step, est_epoch_time, step, num_batches))
-                if step % 50 == 0:
+                print("Epoch: {6} || Step:{4}/{5} Total gen loss = {0:.4f} || Total disc loss = {1:.4f} || Time Per step = {2:.4f}s || Est. Time per epoch = {3:.4f}s"
+                      .format(total_gen_loss, tf.math.reduce_mean(total_disc_loss), time_per_step, est_epoch_time, step, num_batches, epoch))
+                if step % 500 == 0:
                     self.generate_images(self.generator, real_gen_inputs, gen_target_outputs)
                     pass
                 pass
             #Save model after every epoch
-            tf.keras.model.save_model(self.generator, f"Models/Epoch{epoch}/Generator")
-            tf.keras.model.save_model(self.discriminator, f"Models/Epoch{epoch}/Discriminator")
+            tf.keras.models.save_model(self.generator, f"Models/Epoch{epoch+starting_epoch}/Generator")
+            tf.keras.models.save_model(self.discriminator, f"Models/Epoch{epoch+starting_epoch}/Discriminator")
             pass
         pass
 

@@ -1,12 +1,20 @@
+from tensorflow.python.feature_column.feature_column import input_layer
+
 import Dataset_builder
 import UNetGenerator
 import PatchGANDiscriminator
 import ImageTranslationGAN
+import tensorflow as tf
+
+# from keras import mixed_precision
+# policy = mixed_precision.Policy('mixed_float16')
+# mixed_precision.set_global_policy(policy)
 
 dataset_directory_path = "C:/Users/allan/Downloads/GANFacesDateset"
 target_size = (256,256)
-batch_size = 8
-epochs = 10
+input_shape = (256,256,3)
+batch_size =12
+epochs = 20
 gen_filters = 32
 disc_filters = 64
 reconstruction_loss_weight = 100
@@ -14,34 +22,19 @@ reconstruction_loss_weight = 100
 dataset_builder = Dataset_builder.Dataset_builder(directory_path=dataset_directory_path, batch_size=batch_size, target_size=target_size)
 dataset = dataset_builder.get_dataset()
 
-# batch_edges = None
-#
-# for gen_target_outputs in dataset.take(5):
-#     batch_edges = np.zeros_like(gen_target_outputs)
-#     batch_edges = batch_edges[:,:,:,0]
-#     batch_size = gen_target_outputs.shape[0]
-#     for i in range(batch_size):
-#         single_image = gen_target_outputs[i]
-#         image_tensor = single_image.numpy()
-#         blurred_image = cv2.GaussianBlur(image_tensor, (3, 3), 0)
-#         edge_image = cv2.Canny(blurred_image, threshold1=140, threshold2=140)
-#         batch_edges[i] = edge_image
-#         pass
-#     pass
-#
-# batch_edges = tf.expand_dims(batch_edges, axis = -1)
-# batch_edges = tf.tile(batch_edges, [1,1,1,3])
 
 
-
-discriminator_builder = PatchGANDiscriminator.PatchGANDiscriminator(filters=disc_filters)
+discriminator_builder = PatchGANDiscriminator.PatchGANDiscriminator(filters=disc_filters, input_shape=input_shape)
 discriminator = discriminator_builder.get_discriminator()
 
 #Build and get the generator
 generator_builder = UNetGenerator.Generator()
 #generator = generator_builder.get_generator(output_channels=3)
-generator = generator_builder.build_Unet_generator(filters=gen_filters)
+generator = generator_builder.build_Unet_generator(filters=gen_filters, input_shape=input_shape)
 
+
+# generator = tf.keras.models.load_model("Models/Epoch5/Generator")
+# discriminator = tf.keras.models.load_model("Models/Epoch5/Discriminator")
 
 #Set up the GAN
 GAN_builder = ImageTranslationGAN.GAN(reconstruction_loss_weight=reconstruction_loss_weight, generator=generator, discriminator=discriminator)

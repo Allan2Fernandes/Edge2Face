@@ -1,6 +1,7 @@
 import tensorflow as tf
 from keras.layers import Input, Conv2D, Conv2DTranspose, LeakyReLU, BatchNormalization, MaxPool2D, Concatenate
 
+
 class Generator:
     def __init__(self):
         pass
@@ -54,9 +55,9 @@ class Generator:
         x = Conv2D(kernel_size=1, filters=output_channels, strides=1, padding='same', kernel_initializer='he_normal',use_bias=False, activation='tanh')(x)
         return x
 
-    def build_Unet_generator(self, filters):
+    def build_Unet_generator(self, filters, input_shape):
         # Encoder blocks
-        input_layer = Input(shape=(256, 256, 3))
+        input_layer = Input(shape=input_shape)
         block1, skip1 = self.encoding_block(input=input_layer, first_block=True, kernel_size=(4, 4),filters=filters)
         block2, skip2 = self.encoding_block(input=block1, first_block=False, kernel_size=(4, 4),filters=filters*2)
         block3, skip3 = self.encoding_block(input=block2, first_block=False, kernel_size=(4, 4),filters=filters*4)

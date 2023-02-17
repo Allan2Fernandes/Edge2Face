@@ -3,8 +3,8 @@ from keras.layers import Conv2D, BatchNormalization, Dropout, LeakyReLU, MaxPool
 
 
 class PatchGANDiscriminator:
-    def __init__(self, filters = 64):
-        input_shape = (256, 256, 3)
+    def __init__(self, input_shape, filters = 64):
+        input_shape = input_shape
         initializer = tf.keras.initializers.HeNormal()
         gen_input = Input(shape=input_shape)  #Gen inputs or the satellite images
         gen_output = Input(shape=input_shape)  #Gen outputs or the google maps
